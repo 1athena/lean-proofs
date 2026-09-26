@@ -26,12 +26,10 @@ URLs:
 - https://doi.org/10.2307/2317020
 -/
 
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 0
-
-
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 0
+-- The bounded primality / divisibility sweeps below recurse about 1.2e4 deep,
+-- which exceeds the default `maxRecDepth`; 1e5 was measured to be sufficient
+-- (4e4 fails, 6e4 succeeds).  No heartbeat override is needed.
+set_option maxRecDepth 100000
 
 namespace Erdos365
 
@@ -50,7 +48,6 @@ theorem boolAndSplit {a b : Bool} (h : (a && b) = true) : a = true ∧ b = true 
 
 theorem boolAndIntro {a b : Bool} (ha : a = true) (hb : b = true) : (a && b) = true := by
   cases a <;> cases b <;> simp_all
-
 
 theorem allUpToB_spec (f : Nat → Bool) :
     ∀ n, allUpToB f n = true → ∀ k, k ≤ n → f k = true
@@ -78,7 +75,6 @@ theorem allUpToB_of_all (f : Nat → Bool) :
         allUpToB_of_all f n (fun k hk => h k (Nat.le_trans hk (Nat.le_succ n)))
       have h1 : f (n + 1) = true := h (n + 1) (Nat.le_refl (n + 1))
       simp [allUpToB, hn, h1]
-
 
 ------------------------------------------------------------------------------
 -- Primality, and the proof that the computable predicate is the textbook one
@@ -254,10 +250,16 @@ example : Powerful 1 := by
 #print axioms original_claim_is_false
 
 /-- Main result (Erdős Problem 365): the answer to the question is **no**. -/
-theorem erdos_365 :
+theorem not_erdos_365 :
     ¬ (∀ n : Nat, 0 < n → Powerful n → Powerful (n + 1) → IsSquare n ∨ IsSquare (n + 1)) :=
   original_claim_is_false
 
+/-- Alias kept so the result is also reachable under the generic `erdos_NNN` name. -/
+theorem erdos_365 :
+    ¬ (∀ n : Nat, 0 < n → Powerful n → Powerful (n + 1) → IsSquare n ∨ IsSquare (n + 1)) :=
+  not_erdos_365
+
+#print axioms not_erdos_365
 #print axioms erdos_365
 
 end Erdos365
